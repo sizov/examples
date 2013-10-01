@@ -1,0 +1,5 @@
+.idea
+*.iml
+interapp-communication/src/CSharpInterappCommDemo/bin
+interapp-communication/src/CSharpInterappCommDemo/obj
+interapp-communication/src/CSharpInterappCommDemo/*.suo

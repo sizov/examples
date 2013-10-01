@@ -1,0 +1,19 @@
+Description
+
+This example demonstrates Interapplication Messaging between a C# application and 
+an HTML application and between an HTML application and Microsoft Excel
+
+Instructions for running the HTML Interapp Communication Demo
+
+1. Launch the OpenFin App Desktop
+2. Launch Excel and add the Excel add-in ofs-add-in-32.xll or ofs-add-in-64.xll depending on your version of Excel. For help on how to do this, please see http://office.microsoft.com/en-us/excel-help/add-or-remove-add-ins-HP010342658.aspx 
+3. Open the Excel spreadsheet InterAppCommDemo.xls. 
+4. Double click on run.bat. A C# Application window will appear. 
+5. Press "Connect". An HTML application called "HTML Interapp Communication Demo" will appear.
+6. In the C# Application, Enter a topic and some data and press "Send". The Topic 
+and Data will appear in the HTML Application. The HTML application
+will perform some transformation on the data. In this case we have chosen to 
+make the data uppercase. The data will also be sent to the Excel spreadsheet, 
+which will populate the cell called "Incoming Data".
+7. Bring up the HTML Application and click "Send to spreadsheet". The transformed 
+data will also be sent to the Excel spreadsheet under the "Transformed Data" cell.

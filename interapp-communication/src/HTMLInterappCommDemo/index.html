@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>HTML Interapp Communication Demo</title>
+
+    <script type="text/javascript" src="libs/jquery-1.7.2.min.js"></script>
+    <script type="text/javascript" src="libs/openfin-desktop.js"></script>
+    <script type="text/javascript">
+        fin.desktop.main(function () {
+
+            var topics = {};
+
+            fin.desktop.InterApplicationBus.subscribe("csharpinterappcommdemo", "new-topic", function (msg1) {
+                if (topics[msg1.topic] == undefined) {
+                    topics[msg1.topic] = true;
+                    fin.desktop.InterApplicationBus.subscribe("csharpinterappcommdemo", msg1.topic, function (msg2) {
+                        $("#incoming-topic").val(msg1.topic);
+                        $("#incoming-data").val(msg2.data);
+                        $("#transformed-data").val(msg2.data.toUpperCase());
+                    });
+                }
+            });
+
+            $(function () {
+                $("#send-button").click(function () {
+                    fin.desktop.InterApplicationBus.send("exceladapter", "update", {
+                        topic: "transformed-data",
+                        message:  $("#transformed-data").val()
+                    });
+                });
+            });
+			
+			var current = fin.desktop.Window.getCurrent();
+			
+			current.show();
+			
+			if (current.setAsForeground) {
+				current.setAsForeground();
+			} else {
+				current.bringToFront();
+			}
+
+        });
+    </script>
+
+    <style>
+
+        body {
+            background: #f0f0f0;
+        }
+
+        .form-field * {
+            vertical-align: middle;
+        }
+
+        label {
+            width: 190px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+<p class="form-field">
+    <label for="incoming-topic">Incoming Topic</label>
+    <input id="incoming-topic" type="text">
+</p>
+<p class="form-field">
+    <label for="incoming-data">Incoming Data</label>
+    <textarea id="incoming-data" rows="5" cols="30"></textarea>
+</p>
+<p class="form-field">
+    <label for="transformed-data">Incoming Transformed Data</label>
+    <textarea id="transformed-data" rows="5" cols="30"></textarea>
+</p>
+<button id="send-button">Send to Spreadsheet</button>
+
+</body>
+</html>
