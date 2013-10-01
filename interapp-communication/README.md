@@ -1,11 +1,30 @@
-<a target="_blank" href="https://chrome.google.com/webstore/detail/mikhnkopoddcomlgmcjgfnaccjhibiec">![Try it now in CWS](https://raw.github.com/GoogleChrome/chrome-app-samples/master/tryitnowbutton.png "Click here to install this sample from the Chrome Web Store")</a>
 
+# Interapp Communication Demo
 
-# Dialog Element
+In this demo, a C# application, an HTML application, and an Excel spreadsheet share data via the InterApplicationBus and
+the App Desktop Excel Adapter. 
+
+To send a message from C# to HTML
+
+```csharp
+JObject htmlAppMessage = new JObject();
+DesktopUtils.updateJSONValue(htmlAppMessage, "data", dataTextBox.Text);
+interAppBus_.send("htmlinterappcommdemo", topicTextBox.Text, msg);
+
+JObject excelMessage = new JObject();
+DesktopUtils.updateJSONValue(excelMessage, "topic", "incoming-data");
+DesktopUtils.updateJSONValue(excelMessage, "message", dataTextBox.Text);
+interAppBus_.send("exceladapter", "update", excelMessage);
+```
+
+To send a message from C# to Excel
+
+```csharp
+```
 
 The WHATWG defines a new element called `<dialog>` that can be used to define modal and modeless dialogs within an HTML page. This example shows how to use this new element.
 
-NOTE: This sample requires M31 or later in Chrome, and if necessary you might have to enable experimental web features in the chrome://flags page.
+
 
 ```javascript
 var dialog = document.querySelector('#dialog1');
