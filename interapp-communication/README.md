@@ -6,7 +6,7 @@ the App Desktop Excel Adapter.
 
 ### To send a message from C# to HTML
 
-C#:
+C#
 ```java
 InterApplicationBus interAppBus = desktopConnection.getInterApplicationBus();
 
@@ -16,7 +16,7 @@ DesktopUtils.updateJSONValue(htmlAppMessage, "data", "some message");
 interAppBus_.send("htmlinterappcommdemo", "some topic", htmlAppMessage);
 ```
 
-HTML:
+HTML
 
 ```javascript
 fin.desktop.InterApplicationBus.subscribe("csharpinterappcommdemo", function (msg) {
@@ -26,7 +26,7 @@ fin.desktop.InterApplicationBus.subscribe("csharpinterappcommdemo", function (ms
 
 ### To send a message from C# to Excel
 
-C#:
+C#
 ```java
 InterApplicationBus interAppBus = desktopConnection.getInterApplicationBus();
 
