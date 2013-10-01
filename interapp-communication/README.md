@@ -13,7 +13,7 @@ InterApplicationBus interAppBus = desktopConnection.getInterApplicationBus();
 JObject htmlAppMessage = new JObject();
 DesktopUtils.updateJSONValue(htmlAppMessage, "data", "some message");
 
-interAppBus_.send("htmlinterappcommdemo", "some topic", msg);
+interAppBus_.send("htmlinterappcommdemo", "some topic", htmlAppMessage);
 ```
 
 HTML:
@@ -37,6 +37,7 @@ DesktopUtils.updateJSONValue(excelMessage, "message", "a message");
 interAppBus.send("exceladapter", "update", excelMessage);
 ```
 
+Excel
 ```
 =OFS("csharpinterappcommdemo", "incoming-data");
 ```
