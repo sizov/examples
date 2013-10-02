@@ -1,0 +1,17 @@
+#example-tearout {
+    width: 100px;
+    height: 100px;
+    top:21px;
+    left:21px;
+    background-color: #F00;
+    border: 1px black solid;
+}
+
+#tearout-empty-representation {
+    width: 102px;
+    height: 102px;
+    top:20px;
+    left:20px;
+    background-color: #FFF;
+    border: 1px black solid;
+}

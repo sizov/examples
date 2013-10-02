@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Tearout</title>
+        <script src="libs/jquery-1.7.2.min.js"></script>
+        <script src="libs/openfin-desktop.js"></script>
+
+        <link rel="stylesheet" href="css/main.css">
+
+    </head>
+    <script>
+
+        var undockHandler;
+
+        function setUndockHandler(callback) {
+            undockHandler = callback;
+        }
+
+        function dock() {
+            $("#undock-button").show();
+        }
+
+        function undock() {
+            $("#undock-button").hide();
+        }
+
+        $(function () {
+            $("#close-button").click(function () {
+                fin.desktop.Window.getCurrent().close();
+            });
+
+            $("#undock-button").click(function () {
+                if (undockHandler) undockHandler();
+                undock();
+            });
+        });
+
+    </script>
+    <body>
+
+    <div id="tearout">
+        <div class="draggable toolbar">
+            <div class="title">
+                <div>Drag Me</div>
+            </div>
+            <div id="undock-button" class="not-draggable">Undock</div>
+            <div id="close-button" class="not-draggable">X</div>
+        </div>
+
+        <div id="content">
+            Contents
+        </div>
+    </div>
+
+    </body>
+</html>

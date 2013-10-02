@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tear Out Example</title>
+
+    <link rel="stylesheet" href="css/main.css">
+
+    <script src="libs/jquery-1.7.2.min.js"></script>
+    <script src="libs/openfin-desktop.js"></script>
+    <script src="libs/drageffects.js"></script>
+
+
+    <script>
+
+        /**
+         * Tear Out/Docking Example
+         *
+         * This examples show how to drag an HTML element outside of the browser window frame.
+         *
+         */
+        $(function () {
+            // Entry point to the App Desktop
+            fin.desktop.main(function () {
+                var wnd = new fin.desktop.Window({
+                    name: "tearout",
+                    url: "tearout.html",
+                    frame: false,
+                    resize: false,
+                    resizable: false,
+                    draggable: false,
+                    defaultWidth: 300,
+                    defaultHeight: 300,
+                    alwaysOnTop: false,
+                    showTaskbarIcon: false,
+                    autoShow: false
+                }, function () {
+                    wnd.getNativeWindow().onload = function () {
+                        registerHandlers(wnd);
+                    };
+                });
+            });
+        });
+
+
+        function registerHandlers(wnd) {
+            var nativeWnd;
+            var THRESH = 20;
+            var inPage = true;
+
+            var $tearout = $("#tearout");
+            var mainWindow = fin.desktop.Window.getCurrent();
+
+            // Make the window itself draggable
+
+            //  We attach the events here to the JavaScript window object of the child Window rather than
+            //  the one containing the target element as above
+
+            var isSnapped = false;
+
+            //  We attach the events here to the JavaScript window object of the child Window rather than
+            //  the one containing the target element as above
+
+            registerDragHandler(wnd.getNativeWindow(), {
+                onDragStart: function (x, y) {
+                    if (!inPage) {
+                        wnd.updateOptions({
+                            opacity: 0.6
+                        });
+
+                        // If the user clicks the "Undock" button in the tearout, then leave the window group
+                        wnd.getNativeWindow().setUndockHandler(function () {
+                            wnd.leaveGroup();
+                            wnd.isDocked = false;
+                        });
+                    }
+                },
+                onDrag: function (x, y) {
+                    if (!inPage) {
+                        if (withinDockingRegion(x, y)) {
+                            $tearout.css("opacity", "1");
+                            wnd.hide();
+                        } else {
+                            $tearout.css("opacity", "0");
+                            var newCoords = getDockingCoordinates(x, y, wnd);
+                            wnd.showAt(newCoords.x , newCoords.y);
+                            wnd.bringToFront();
+                        }
+                    }
+                },
+                onDragEnd: function (x, y) {
+                    if (!inPage) {
+                        if (withinDockingRegion(x, y)) {
+                            $tearout.css("opacity", "1");
+                            wnd.hide();
+                            inPage = true;
+                        } else {
+                            $tearout.css("opacity", "0");
+                            wnd.show();
+                            // Make the window opaque
+                            wnd.updateOptions({
+                                opacity: 1
+                            });
+
+                            if(wnd.shouldDock) {
+                                wnd.mergeGroups(mainWindow);
+                                wnd.getNativeWindow().dock();
+                                wnd.isDocked = true;
+                                wnd.shouldDock = false;
+                                wnd.getNativeWindow().dock();
+                            }
+                        }
+                    }
+                }
+            }, {
+                thresh: 3,
+                targetSelector: ".draggable"
+            });
+
+
+            /**
+             * Attaches a drag handler to a specified target element. The handler notifies when the user has begun to drag,
+             * is dragging, and has ended dragging the element, as well as when the user tries to dock the
+             * element to its original position. Within the callbacks for each of these events, we can
+             * create and position a Window object to give the appearance of the element being torn
+             * out of the browser frame. The suggested position of the element (x,y) is passed as an argument.
+             *
+             * The "targetSelector" option specifies which element(s) the drag handler will be applied to. This must be a
+             * selector string (".class", "#id", "div", etc.). Here we label elements that we want to be used for dragging
+             * (like the toolbar) with the CSS class "draggable." The default value is ".draggable".
+             *
+             * The "nonTargetSelector" option specifies the element(s) the drag handler will not be applied to. The default selector is
+             * ".not-draggable".
+             *
+             * The "thresh" option is the number of pixels the user can move his mouse while dragging the element before the drag
+             * start event is fired. The default is 3.
+             *
+             * We attach the events here to the JavaScript window object containing the target element.
+             */
+            registerDragHandler(window, {
+                onDragStart: function (x, y) {
+                    if (inPage) {
+                        // Show the window at the specified position
+                        // Make the window slightly transparent
+                        wnd.showAt(x, y);
+                        wnd.bringToFront();
+                        wnd.updateOptions({
+                            opacity: 0.6
+                        });
+                    }
+                },
+                onDrag: function (x, y) {
+                    // Move the window to the specified position
+                    if (inPage) {
+                        if (withinDockingRegion(x, y)) {
+                            $tearout.css("opacity", "1");
+                            wnd.hide();
+                        } else {
+                            wnd.showAt(x, y);
+                            $tearout.css("opacity", "0");
+                        }
+                    }
+                },
+                onDragEnd: function (x, y) {
+                    if (inPage) {
+                        if (withinDockingRegion(x, y)) {
+                            $tearout.css("opacity", "1");
+                            wnd.hide();
+                            inPage = true;
+                        } else {
+                            // Make the window opaque
+                            wnd.updateOptions({
+                                opacity: 1
+                            });
+                            inPage = false;
+                        }
+                    }
+                }
+            }, {
+                thresh: THRESH,
+                targetSelector: ".draggable"
+            });
+
+            function withinDockingRegion(x, y) {
+                var pos = $tearout.offset();
+                var eX = window.screenX + 6 + pos.left;
+                var eY = window.screenY + 29 + pos.top;
+
+                return (Math.sqrt(Math.pow(x - eX, 2) + Math.pow(y - eY, 2)) < THRESH);
+            }
+
+
+            /**
+             * Returns the docking position given the suggested x, y provided by the drag handler.
+             * @param x
+             * @param y
+             * @param childWnd
+             * @return {{x: *, y: *}}
+             */
+            function getDockingCoordinates(x, y, childWnd) {
+
+                // If the window is already docked, then do nothing.
+                if (childWnd.isDocked) {
+                    return {
+                        x: x,
+                        y: y
+                    };
+                }
+
+                var mainWindowHeight = window.outerHeight;
+                var mainWindowWidth = window.outerWidth;
+                var mainWindowLeft = window.screenLeft;
+                var mainWindowTop = window.screenTop;
+
+                var thresh = 10;
+
+                  //if not docked
+                var childNativeWindow = childWnd.getNativeWindow();
+                var childNativeWindowHeight = childNativeWindow.outerHeight;
+                var childNativeWindowWidth = childNativeWindow.outerWidth;
+                var childNativeWindowLeft = x;
+                var childNativeWindowTop = y;
+
+                var snappedX = x;
+                var snappedY = y;
+                var isSnapping = false;
+
+                // When the child window attempts to snap to the BOTTOM of the main window
+                if (Math.abs((childNativeWindowTop) - (mainWindowTop + mainWindowHeight)) <= thresh &&
+                   doRangesOverlap({min: mainWindowLeft, max: mainWindowLeft + mainWindowWidth},
+                                   {min: childNativeWindowLeft, max: childNativeWindowLeft + childNativeWindowWidth})) {
+                    snappedY = mainWindowTop + mainWindowHeight;
+                    isSnapping = true;
+                // When the child window attempts to snap to the TOP of the main window
+                } else if (Math.abs((childNativeWindowTop + childNativeWindowHeight) - (mainWindowTop)) <= thresh &&
+                          doRangesOverlap({min: mainWindowLeft, max: mainWindowLeft + mainWindowWidth},
+                                          {min: childNativeWindowLeft, max: childNativeWindowLeft + childNativeWindowWidth})) {
+                    snappedY = mainWindowTop - childNativeWindowHeight;
+                    isSnapping = true;
+                // When the child window attempts to snap to the RIGHT of the main window
+                } else if (Math.abs((childNativeWindowLeft) - (mainWindowLeft + mainWindowWidth)) <= thresh &&
+                        doRangesOverlap({ min: mainWindowTop, max: mainWindowTop + mainWindowHeight },
+                                        { min: childNativeWindowTop, max: childNativeWindowTop + childNativeWindowHeight})) {
+                    snappedX = mainWindowLeft + mainWindowWidth;
+                    isSnapping = true;
+                // When the child window attempts to snap to the LEFT of the main window
+                } else  if(Math.abs((childNativeWindowLeft + childNativeWindowWidth) - (mainWindowLeft)) <= thresh &&
+                           doRangesOverlap({min: mainWindowTop, max: mainWindowTop + mainWindowHeight},
+                                           {min: childNativeWindowTop, max: childNativeWindowTop + childNativeWindowHeight})){
+                    snappedX = mainWindowLeft - childNativeWindowWidth;
+                    isSnapping = true;
+                }
+
+                // Indicate that the child window should be docked after this function returns.
+                childWnd.shouldDock = isSnapping;
+
+                // return the updated
+                return {
+                    x: snappedX,
+                    y: snappedY
+                };
+            }
+
+            function doRangesOverlap(minMax1, minMax2) {
+                return((minMax2.min >= minMax1.min && minMax2.min <= minMax1.max) ||
+                    (minMax2.max >= minMax1.min && minMax2.max <= minMax1.max) ||
+                    (minMax2.min <= minMax1.min && minMax2.max >= minMax1.max));
+            }
+        }
+
+    </script>
+</head>
+
+<body>
+<!-- Only elements labeled "draggable" are capable of dragging the window.
+ Any elements contained within draggable elements that are labeled "not-draggable" cannot be used
+ to drag the window. -->
+<div id="tearout">
+    <div class="draggable toolbar">
+        <div class="title">
+            <div>Drag me</div>
+        </div>
+        <div id="close-button" class="not-draggable">X</div>
+    </div>
+    <div class="not-draggable">
+        Contents
+    </div>
+</div>
+
+</body>
+</html>
