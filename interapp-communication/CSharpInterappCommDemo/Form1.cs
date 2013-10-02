@@ -29,6 +29,12 @@ namespace InterAppCommDemo
             //setConnectButtonState("Connect", true, false);
             subscriptionMap = new Dictionary<string, bool>();
             controller_ = new DesktopConnection(uuid_, "127.0.0.1", 9696);
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(formClosedHandler);
+        }
+
+        private void formClosedHandler(object sender, EventArgs e)
+        {
+            controller_.disconnect();
         }
 
         private void connectButton_Click(object sender, EventArgs e)
