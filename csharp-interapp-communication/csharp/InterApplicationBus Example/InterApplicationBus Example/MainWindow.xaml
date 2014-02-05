@@ -1,0 +1,11 @@
+﻿<!-- Incredibly simplified XAML -->
+<Window x:Class="InterApplicationBus_Example.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="MainWindow" Height="374" Width="506">
+    <StackPanel>
+        <TextBlock Text="Enter some text" />
+        <TextBox x:Name="ResponseTextBox" />
+        <Button Content="Send" Click="SendMessage" />
+    </StackPanel>
+</Window>
