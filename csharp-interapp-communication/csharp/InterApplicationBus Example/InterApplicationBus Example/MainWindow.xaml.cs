@@ -43,6 +43,9 @@ namespace InterApplicationBus_Example
             connection_.connect(this);
         }
 
+        /// <summary>
+        ///     Sends a message using the InterApplicationBus
+        /// </summary>
         public void SendMessage(object sender, RoutedEventArgs e)
         {
             // Create JSON payload containing the user input text
@@ -51,6 +54,50 @@ namespace InterApplicationBus_Example
 
             // Send to HTML application
             connection_.getInterApplicationBus().send(receiverUuid_, "show-message", messagePayload);
+        }
+
+        /// <summary>
+        ///     Move the HTML window up 10 pixels
+        /// </summary>
+        public void MoveWindowUp(object sender, RoutedEventArgs e)
+        {
+            if (htmlApp_ != null)
+            {
+                htmlApp_.getWindow().moveBy(0, -10);
+            }
+        }
+
+        /// <summary>
+        ///     Move the HTML window left 10 pixels
+        /// </summary>
+        public void MoveWindowLeft(object sender, RoutedEventArgs e)
+        {
+            if (htmlApp_ != null)
+            {
+                htmlApp_.getWindow().moveBy(-10, 0);
+            }
+        }
+
+        /// <summary>
+        ///     Move the HTML window right 10 pixels
+        /// </summary>
+        public void MoveWindowDown(object sender, RoutedEventArgs e)
+        {
+            if (htmlApp_ != null)
+            {
+                htmlApp_.getWindow().moveBy(0, 10);
+            }
+        }
+
+        /// <summary>
+        ///     Move the HTML window down 10 pixels
+        /// </summary>
+        public void MoveWindowRight(object sender, RoutedEventArgs e)
+        {
+            if (htmlApp_ != null)
+            {
+                htmlApp_.getWindow().moveBy(10, 0);
+            }
         }
 
         // DesktopStateListener methods
@@ -64,20 +111,23 @@ namespace InterApplicationBus_Example
         /// </summary>
         public void onReady()
         {
-            // Default some options for the application and its main window
-            ApplicationOptions options = new ApplicationOptions(receiverUuid_,
-                                                                receiverUuid_, 
-                                                                "https://demoappdirectory.openf.in/desktop/examples/interapp-receiver/index.html");
-            options.MainWindowOptions.AutoShow = true;
-            options.MainWindowOptions.DefaultWidth = 800;
-            options.MainWindowOptions.DefaultHeight = 600;
+            // Run on UI thread
+            this.Dispatcher.Invoke(new Action(() => {
+                // Default some options for the application and its main window
+                ApplicationOptions options = new ApplicationOptions(receiverUuid_,
+                                                                    receiverUuid_, 
+                                                                    "https://demoappdirectory.openf.in/desktop/examples/interapp-receiver/index.html");
+                options.MainWindowOptions.AutoShow = true;
+                options.MainWindowOptions.DefaultWidth = 800;
+                options.MainWindowOptions.DefaultHeight = 600;
 
-            // Create and run the HTML application
-            htmlApp_ = new Openfin.Desktop.Application(options, connection_);
+                // Create and run the HTML application
+                htmlApp_ = new Openfin.Desktop.Application(options, connection_);
 
-            // Setting delegate on error callback as well. 
-            // handles the case where the application is already running.
-            htmlApp_.run(afterRun, afterRun);
+                // Setting delegate on error callback as well. 
+                // handles the case where the application is already running.
+                htmlApp_.run(afterRun, afterRun);
+            }));
         }
 
         /// <summary>
