@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>InterApplicationBus Message Receiver</title>
+		<script src="libs/openfin-desktop-2.0.2.0.js"></script>
+		<script src="libs/jquery-1.7.2.min.js"></script>
+		<script>
+			$(function () {
+
+				// Entry point for a window running in the OpenFin App Desktop.
+				// The success callback is invoked after a connection has been established 
+				fin.desktop.main(function () {
+
+ 					// Subscribe to topic 'show-message' from any application. 
+					// Append all receieved data to the body tag.
+					fin.desktop.InterApplicationBus.subscribe('*', 'show-message', function(data, senderUUID) {
+                                          var displayData = (typeof data != "object"? data : JSON.stringify(data));
+						$('body').append("[" + (new Date().toUTCString()) + "] - From \"" + senderUUID + "\": " + displayData + "<br>");
+					});
+				});
+			});
+		</script>
+	</head>
+
+	<body>
+	</body>
+</html>
