@@ -114,13 +114,16 @@
 					}
 					
 					if(info.reason == "self") {
-						lastBounds_ = info;
 						isChanging_ = false;
 						
 						if(shouldDock_ && !me.isDocked()) {
-							me.group();
 							shouldDock_ = false;
+							wnd_.moveTo(lastBounds_.left, lastBounds_.top, function() {
+								me.group();
+							});
 						}
+						
+						lastBounds_ = info;
 					}
 				}
 			}
