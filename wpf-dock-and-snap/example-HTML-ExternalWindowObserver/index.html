@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>HTML window</title>
+    <link rel="stylesheet" href="css/main.css">
+    <script src="libs/openfin-desktop-2.0.3.1.js" type="text/javascript"></script>
+    <script src="libs/jquery-1.7.2.min.js" type="text/javascript"></script>
+    <script src="libs/handlebars.js" type="text/javascript"></script>
+    <script type="text/javascript">
+
+		var externalWindow;
+		var onExternalWindowClosed = function() {
+			cleanupExternalApp();
+		};
+        
+		var SingleWindowDockHandler = function(uuid, name) {
+			var me = this;
+			
+			var otherWnd_ = fin.desktop.Window.wrap(uuid, name);
+			var wnd_ = fin.desktop.Window.getCurrent();
+			var isDocked_ = false;
+			var isChanging_ = false;
+			var opacity_ = 1;
+			var handlingDrag_ = false;
+			var shouldDock_ = false;
+			var ignoreDock_ = false;
+			var movePositions_ = [];
+			var lastBounds_;
+			
+			me.unGroup = function () {
+				fin.desktop.Window.getCurrent().leaveGroup();
+				isDocked_ = false;
+			};
+			
+			me.group = function () {
+				fin.desktop.Window.getCurrent().joinGroup(externalWindow);
+				isDocked_ = true;
+			};
+			
+			me.isDocked = function () { return isDocked_; };
+			
+			function boundsChangingHandler(info) {
+				if(info.reason == "self") {
+					// If starting to drag
+					if(!isChanging_) {
+						// If not already modified, not docked and not the result of a group move.
+						if(opacity_ == 1 && 
+						   !me.isDocked() && 
+						   info.reason == "self") { 
+							opacity_ = 0.6;
+							wnd_.updateOptions({
+								opacity: opacity_
+							});
+						}
+						
+						lastBounds_ = info;
+					// If dragging
+					} else {
+						if(!handlingDrag_ && 
+							!me.isDocked()) {
+							handlingDrag_ = true;
+							wnd_.getBounds(function(bounds) {
+								if(bounds.left != lastBounds_.left || 
+								   bounds.top != lastBounds_.top ||
+								   bounds.width != lastBounds_.width ||
+								   bounds.height != lastBounds_.height) {
+									getDockingCoordinates(bounds, function(newCoords) {
+										if(shouldDock_ && (newCoords.x != bounds.left || newCoords.y != bounds.top)) {
+											ignoreDock_ = true;
+											movePositions_.push(newCoords);
+											wnd_.moveTo(newCoords.x , newCoords.y, function() {
+												ignoreDock_ = false;
+												handlingDrag_ = false;
+											});
+										} else {
+											handlingDrag_ = false;
+										}
+									});
+								} else {
+									handlingDrag_ = false;
+								}
+								lastBounds_ = bounds;
+							});
+						} 
+					}
+				
+					isChanging_ = true;
+				}
+				
+				//lastBounds_ = info;
+			}
+			
+			function boundsChangedHandler(info) {
+				// Find if this is in response to an API event
+				var matchIndex = -1;
+				var matchPos;
+				for(var i = 0; i < movePositions_.length; ++i) {
+					matchPos = movePositions_[i];
+					if(info.left == matchPos.x && info.top == matchPos.y) {
+						matchFound = i;
+						movePositions_.splice(i,1);
+						break;
+					} else {
+						matchPos = null;
+					}
+				}
+				
+				if(!matchPos) {
+					if(opacity_ != 1.0) {
+						opacity_ = 1;
+						wnd_.updateOptions({
+							opacity: opacity_
+						});
+					}
+					
+					if(info.reason == "self") {
+						lastBounds_ = info;
+						isChanging_ = false;
+						
+						if(shouldDock_ && !me.isDocked()) {
+							me.group();
+							shouldDock_ = false;
+						}
+					}
+				}
+			}
+			
+			/**
+             * Returns the docking position given the suggested x, y.
+             */
+            function getDockingCoordinates(bounds, callback) {
+				var x = bounds.left;
+				var y = bounds.top;
+				
+                // If the window is already docked, then do nothing.
+                if (me.isDocked()) {
+                    callback({
+                        x: x,
+                        y: y
+                    });
+                }
+				
+				//if not docked
+				otherWnd_.getBounds(function(bounds){
+					var otherWindowHeight = bounds.height;
+					var otherWindowWidth = bounds.width;
+					var otherWindowLeft = bounds.left;
+					var otherWindowTop = bounds.top;
+
+					var thresh = 10;
+
+					var childNativeWindowHeight = bounds.height;
+					var childNativeWindowWidth = bounds.width;
+					var childNativeWindowLeft = x;
+					var childNativeWindowTop = y;
+
+					var snappedX = x;
+					var snappedY = y;
+					var isSnapping = false;
+
+					// When the child window attempts to snap to the BOTTOM of the other window
+					if (Math.abs((childNativeWindowTop) - (otherWindowTop + otherWindowHeight)) <= thresh &&
+					   doRangesOverlap({min: otherWindowLeft, max: otherWindowLeft + otherWindowWidth},
+									   {min: childNativeWindowLeft, max: childNativeWindowLeft + childNativeWindowWidth})) {
+						snappedY = otherWindowTop + otherWindowHeight;
+						isSnapping = true;
+					// When the child window attempts to snap to the TOP of the other window
+					} else if (Math.abs((childNativeWindowTop + childNativeWindowHeight) - (otherWindowTop)) <= thresh &&
+							  doRangesOverlap({min: otherWindowLeft, max: otherWindowLeft + otherWindowWidth},
+											  {min: childNativeWindowLeft, max: childNativeWindowLeft + childNativeWindowWidth})) {
+						snappedY = otherWindowTop - childNativeWindowHeight;
+						isSnapping = true;
+					// When the child window attempts to snap to the RIGHT of the other window
+					} else if (Math.abs((childNativeWindowLeft) - (otherWindowLeft + otherWindowWidth)) <= thresh &&
+							doRangesOverlap({ min: otherWindowTop, max: otherWindowTop + otherWindowHeight },
+											{ min: childNativeWindowTop, max: childNativeWindowTop + childNativeWindowHeight})) {
+						snappedX = otherWindowLeft + otherWindowWidth;
+						isSnapping = true;
+					// When the child window attempts to snap to the LEFT of the other window
+					} else  if(Math.abs((childNativeWindowLeft + childNativeWindowWidth) - (otherWindowLeft)) <= thresh &&
+							   doRangesOverlap({min: otherWindowTop, max: otherWindowTop + otherWindowHeight},
+											   {min: childNativeWindowTop, max: childNativeWindowTop + childNativeWindowHeight})){
+						snappedX = otherWindowLeft - childNativeWindowWidth;
+						isSnapping = true;
+					}
+
+					// Indicate that the child window should be docked after this function returns.
+					shouldDock_ = isSnapping;
+
+					// return the updated
+					callback({
+						x: snappedX,
+						y: snappedY
+					});
+				});
+            }
+			
+			function doRangesOverlap(minMax1, minMax2) {
+                return((minMax2.min >= minMax1.min && minMax2.min <= minMax1.max) ||
+                    (minMax2.max >= minMax1.min && minMax2.max <= minMax1.max) ||
+                    (minMax2.min <= minMax1.min && minMax2.max >= minMax1.max));
+            }
+			
+			me.cleanup = function() {
+				wnd_.removeEventListener('bounds-changing', boundsChangingHandler);
+				wnd_.removeEventListener('bounds-changed', boundsChangedHandler);
+			}
+			
+			// Set up event listeners
+			wnd_.addEventListener('bounds-changing', boundsChangingHandler);
+			wnd_.addEventListener('bounds-changed', boundsChangedHandler);
+			return me;
+		};
+		
+		fin.desktop.main(function () {
+			var me = this;
+			
+			var singleWindowDockHandler; // assigned when C# reserves name
+			var currentWnd = fin.desktop.Window.getCurrent(); 
+			var currentApp = fin.desktop.Application.getCurrent();
+			var uuid = currentApp.uuid;
+			var mainWindowName = currentApp.getWindow().name;
+			var name = currentWnd.name;
+			var isMainWindow = mainWindowName == name;
+			
+            $(function () {
+				// If main window
+				if(isMainWindow) {
+					fin.desktop.InterApplicationBus.subscribe("*", "get-external-wpf-name", function(data, senderUuid){
+						fin.desktop.InterApplicationBus.send(senderUuid, "set-external-wpf-name", {name: externalWindow.name});
+					});
+					
+					fin.desktop.InterApplicationBus.subscribe("*", "reserve-csharp-name", function(data, senderUuid){
+						if(data && data.name) {
+							// Kill all child windows when main window receieves the message
+							cleanupExternalApp();
+
+							var currentApp = fin.desktop.Application.getCurrent();
+							var uuid = currentApp.uuid;
+							var name = data.name;
+							externalWindow = fin.desktop.Window.wrap(uuid, name);
+							
+							if(singleWindowDockHandler) {
+								singleWindowDockHandler.cleanup();
+							}
+							
+							singleWindowDockHandler = new SingleWindowDockHandler(uuid, name);
+							
+							// Notify C# that HTML is ready
+							fin.desktop.InterApplicationBus.send(senderUuid, "csharp-registered", {});
+						}
+					});
+					
+					fin.desktop.InterApplicationBus.publish("html-wpf-ready");
+					
+					fin.desktop.InterApplicationBus.subscribe("*", "wpf-html-ready", function(data, senderUuid){
+							fin.desktop.InterApplicationBus.send(senderUuid, "html-wpf-ready");
+					});
+					
+					
+				}
+				// Child window subscription
+				else {			
+					fin.desktop.InterApplicationBus.subscribe(uuid, "set-external-wpf-name", function(data, senderUuid){
+						if(data && data.name) {
+							externalWindow = fin.desktop.Window.wrap(uuid, data.name);
+							singleWindowDockHandler = new SingleWindowDockHandler(uuid, data.name);
+						}
+					});
+					
+					fin.desktop.InterApplicationBus.send(uuid, "get-external-wpf-name");
+				}		
+            
+			
+				function unGroup() {
+					if(singleWindowDockHandler) 
+						singleWindowDockHandler.unGroup();
+				}
+				
+				function group() {
+					if(singleWindowDockHandler)
+						singleWindowDockHandler.group();
+				}
+				
+				function cleanupExternalApp() {
+					// Erase all child windows
+					var currentApp = fin.desktop.Application.getCurrent();
+					currentApp.getChildWindows(function(children){
+						children.forEach(function(childWindow){
+							childWindow.close();
+						});
+					});
+
+					if(externalWindow) {
+						unGroup();
+						externalWindow.close();
+						externalWindow = undefined;
+					}
+				}
+				
+				$("#left-button").click(function() {
+					if(externalWindow)
+						externalWindow.moveBy(-10, 0);    
+				});
+
+				$("#right-button").click(function() {
+					if(externalWindow)
+						externalWindow.moveBy(10, 0);    
+				});
+
+				$("#up-button").click(function() {
+					if(externalWindow)
+						externalWindow.moveBy(0, -10);    
+				});
+
+				$("#down-button").click(function() {
+					if(externalWindow)
+						externalWindow.moveBy(0, 10);    
+				});
+
+				$("#exit").click(function() {
+					fin.desktop.System.exit();
+				});
+				
+				$("#group").click(function() {
+					group();
+				});
+				
+				$("#un-group").click(function() {
+					unGroup();
+				});
+				
+				$("#create-child-button").click(function() {
+					var name = fin.desktop.getUuid();
+					var wnd = new fin.desktop.Window({
+						name: name,
+						url: location.href,
+						showTaskbarIcon: true,
+						autoShow: true,
+						defaultWidth: 310,
+						defaultHeight: 287
+					});
+					
+					wnd.show();
+				});
+			});
+        });
+    </script>
+</head>
+<body>
+	<button id="exit">Exit</button>
+
+	<h1>Move External C# App </h1>
+
+	<div id="controls">
+		<button id="create-child-button">Create Child</button>
+		<button id="left-button">Move Left</button>
+		<button id="right-button">Move Right</button>
+		<button id="up-button">Move Up</button>
+		<button id="down-button">Move Down</button>
+		<br>
+		<button id="group">group</button>
+		<button id="un-group">ungroup</button>
+	</div>
+</body>
+</html>

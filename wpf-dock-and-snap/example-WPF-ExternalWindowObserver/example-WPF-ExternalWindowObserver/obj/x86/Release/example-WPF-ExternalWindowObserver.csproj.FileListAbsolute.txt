@@ -1,0 +1,17 @@
+C:\src\C#\examples\ExternalDock\example-WPF-ExternalWindowObserver\example-WPF-ExternalWindowObserver\bin\Release\example-WPF-ExternalWindowObserver.exe
+C:\src\C#\examples\ExternalDock\example-WPF-ExternalWindowObserver\example-WPF-ExternalWindowObserver\bin\Release\example-WPF-ExternalWindowObserver.pdb
+C:\src\C#\examples\ExternalDock\example-WPF-ExternalWindowObserver\example-WPF-ExternalWindowObserver\bin\Release\OpenfinDesktop.dll
+C:\src\C#\examples\ExternalDock\example-WPF-ExternalWindowObserver\example-WPF-ExternalWindowObserver\bin\Release\WebSocket4Net.dll
+C:\src\C#\examples\ExternalDock\example-WPF-ExternalWindowObserver\example-WPF-ExternalWindowObserver\bin\Release\Newtonsoft.Json.dll
+C:\src\C#\examples\ExternalDock\example-WPF-ExternalWindowObserver\example-WPF-ExternalWindowObserver\bin\Release\OpenfinDesktop.pdb
+C:\src\C#\examples\ExternalDock\example-WPF-ExternalWindowObserver\example-WPF-ExternalWindowObserver\bin\Release\OpenfinDesktop.xml
+C:\src\C#\examples\ExternalDock\example-WPF-ExternalWindowObserver\example-WPF-ExternalWindowObserver\obj\x86\Release\example-WPF-ExternalWindowObserver.csprojResolveAssemblyReference.cache
+C:\src\C#\examples\ExternalDock\example-WPF-ExternalWindowObserver\example-WPF-ExternalWindowObserver\obj\x86\Release\MainWindow.baml
+C:\src\C#\examples\ExternalDock\example-WPF-ExternalWindowObserver\example-WPF-ExternalWindowObserver\obj\x86\Release\MainWindow.g.cs
+C:\src\C#\examples\ExternalDock\example-WPF-ExternalWindowObserver\example-WPF-ExternalWindowObserver\obj\x86\Release\App.g.cs
+C:\src\C#\examples\ExternalDock\example-WPF-ExternalWindowObserver\example-WPF-ExternalWindowObserver\obj\x86\Release\example-WPF-ExternalWindowObserver_MarkupCompile.cache
+C:\src\C#\examples\ExternalDock\example-WPF-ExternalWindowObserver\example-WPF-ExternalWindowObserver\obj\x86\Release\example-WPF-ExternalWindowObserver.g.resources
+C:\src\C#\examples\ExternalDock\example-WPF-ExternalWindowObserver\example-WPF-ExternalWindowObserver\obj\x86\Release\example_WPF_ExternalWindowObserver.Properties.Resources.resources
+C:\src\C#\examples\ExternalDock\example-WPF-ExternalWindowObserver\example-WPF-ExternalWindowObserver\obj\x86\Release\example-WPF-ExternalWindowObserver.csproj.GenerateResource.Cache
+C:\src\C#\examples\ExternalDock\example-WPF-ExternalWindowObserver\example-WPF-ExternalWindowObserver\obj\x86\Release\example-WPF-ExternalWindowObserver.exe
+C:\src\C#\examples\ExternalDock\example-WPF-ExternalWindowObserver\example-WPF-ExternalWindowObserver\obj\x86\Release\example-WPF-ExternalWindowObserver.pdb

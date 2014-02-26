@@ -1,0 +1,83 @@
+.icon {
+    width: 50px;
+    height: 50px;
+    display: block;
+    float: left;
+}
+
+.details {
+    position: absolute;
+
+    left: 75px;
+}
+
+.app-row {
+    width: 360px;
+
+}
+
+.details .description {
+
+}
+
+.details .name {
+    font-weight: bold;
+
+}
+
+.details .path {
+    
+}
+
+
+.details .uuid {
+    
+}
+
+.launch {
+
+    margin-top: 5px;
+    background-color: lightgray;
+    color: black;
+    padding: 6px;
+    border-radius: 5px;
+    
+
+    position:  absolute;
+
+    right: 0;
+
+}
+
+.app-list {
+    list-style-type: none;
+
+}
+
+.app-row {
+    border-bottom: 1px solid gainsboro;
+    height: 69px;
+    padding: 9px;
+    position: relative;
+}
+
+
+#controls {
+
+}
+
+#left-button {
+    display: inline-block;
+}
+
+#right-button {
+    display: inline-block;
+}
+
+#up-button {
+    display: inline-block;
+}
+
+#down-button {
+    display: inline-block;
+}
