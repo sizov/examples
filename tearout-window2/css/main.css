@@ -1,0 +1,23 @@
+
+body {
+    margin: 0;
+    overflow:hidden;
+}
+
+.tearout {
+    background: #dcdcc6;
+    width: 100px;
+    height: 100px;
+    position: relative;
+}
+
+.num1, .num2 {
+    color: black;
+    font-size: 10px;
+    font-family: arial;
+    padding: 10px 5px;
+}
+
+.child .tearout {
+    -webkit-app-region: drag;
+}

@@ -1,0 +1,92 @@
+<!--
+    Another example of a tearout. In this example, the content in the tearout is
+    the same element that was ripped out of the page.
+-->
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <link rel="stylesheet" href="css/main.css">
+    <script type="text/javascript" src="libs/jquery/jquery.js"></script>
+    <script type="text/javascript" src="libs/openfin/drageffects.js"></script>
+    <script type="text/javascript" src="libs/openfin/openfin-desktop.js"></script>
+
+    <script type="text/javascript">
+        fin.desktop.main(function () {
+            fin.desktop.Window.getCurrent().show();
+
+            $(function () {
+                var $tc = $(".tearout-container");
+                var $tearout = $(".tearout");
+
+
+                var wnd = new fin.desktop.Window({
+                    name: "tearout",
+                    url: "child.html",
+                    frame: false,
+                    resizable: false,
+                    defaultWidth: 100,
+                    defaultHeight: 100,
+                    alwaysOnTop: false,
+                    showTaskbarIcon: false,
+                    autoShow: false
+                }, function () {
+                    wnd.resizeTo(100, 100);
+                    registerHandlers(wnd);
+                });
+
+                setInterval(function () {
+                    $tearout.find(".num1").text("Bid: " + Math.round(Math.random()*100)/100);
+                    $tearout.find(".num2").text("Offer: " + Math.round(Math.random()*100)/100);
+                }, 1000);
+
+
+                function registerHandlers(wnd) {
+                    var THRESH = 3;
+
+                    registerDragHandler(window, {
+                        onDragStart: function (x, y) {
+                            wnd.showAt(x, y);
+                            wnd.bringToFront();
+                            wnd.updateOptions({
+                                opacity: 0.6
+                            });
+
+                            moveElementToChild(wnd, $tearout.get(0));
+                        },
+                        onDrag: function (x, y) {
+                            wnd.showAt(x, y);
+                        },
+                        onDragEnd: function (x, y) {
+                            wnd.updateOptions({
+                                opacity: 1
+                            });
+                        }
+                    }, {
+                        thresh: THRESH,
+                        target: $tc.get(0)
+                    });
+
+                    function moveElementToChild(wnd, element) {
+                        var nativeWnd = wnd.getNativeWindow();
+                        nativeWnd.document.body.appendChild(element);
+                    }
+
+                    function moveElementToParent(container, element) {
+                        container.appendChild(element);
+                    }
+                }
+            });
+        });
+    </script>
+
+</head>
+<body>
+    <div class="tearout-container">
+        <div class="tearout">
+            <div class="num1"></div>
+            <div class="num2"></div>
+        </div>
+    </div>
+</body>
+</html>
