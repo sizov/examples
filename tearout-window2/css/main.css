@@ -19,5 +19,7 @@ body {
 }
 
 .child .tearout {
+    /* Vladimir (24.06.2014) disabled to show problems with mouse moves in child window
     -webkit-app-region: drag;
+    */
 }

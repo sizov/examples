@@ -7,7 +7,10 @@
 <head>
     <title></title>
     <link rel="stylesheet" href="css/main.css">
-    <script type="text/javascript" src="libs/jquery/jquery.js"></script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">  
+
+    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
     <script type="text/javascript" src="libs/openfin/drageffects.js"></script>
     <script type="text/javascript" src="libs/openfin/openfin-desktop.js"></script>
 
@@ -16,6 +19,8 @@
             fin.desktop.Window.getCurrent().show();
 
             $(function () {
+                $("#slider").slider();
+
                 var $tc = $(".tearout-container");
                 var $tearout = $(".tearout");
 
@@ -29,7 +34,8 @@
                     defaultHeight: 100,
                     alwaysOnTop: false,
                     showTaskbarIcon: false,
-                    autoShow: false
+                    autoShow: false,
+                    contextMenu: true
                 }, function () {
                     wnd.resizeTo(100, 100);
                     registerHandlers(wnd);
@@ -70,6 +76,11 @@
                     function moveElementToChild(wnd, element) {
                         var nativeWnd = wnd.getNativeWindow();
                         nativeWnd.document.body.appendChild(element);
+
+                        $('#bringBack').show();
+                        $('#bringBack').click(function(){
+                            window.document.body.appendChild(element);    
+                        });
                     }
 
                     function moveElementToParent(container, element) {
@@ -86,7 +97,10 @@
         <div class="tearout">
             <div class="num1"></div>
             <div class="num2"></div>
+            <div id="slider" class="not-draggable tearout"></div>
         </div>
     </div>
+
+    <button id="bringBack" style="display:none">bring back tear-off</button>
 </body>
 </html>
